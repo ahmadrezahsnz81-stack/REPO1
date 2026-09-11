@@ -29,7 +29,7 @@ jobs:
       - name: Build portable folder
         shell: pwsh
         run: |
-          pyinstaller --noconfirm --clean --windowed --name "DJAR RVC Studio" --collect-all PySide6 --collect-all numpy --collect-all soundfile --hidden-import requests app/studio_v2.py
+          pyinstaller --noconfirm --clean --windowed --name "DJAR RVC Studio" --collect-all PySide6 --collect-all numpy --collect-all soundfile --hidden-import requests app/launcher.py
 
       - name: Add README
         shell: pwsh
@@ -45,6 +45,6 @@ jobs:
       - name: Upload portable folder
         uses: actions/upload-artifact@v4
         with:
-          name: DJAR-RVC-Studio-Portable-v2
+          name: DJAR-RVC-Studio-Portable-v3
           path: 'dist/DJAR RVC Studio'
           if-no-files-found: error
