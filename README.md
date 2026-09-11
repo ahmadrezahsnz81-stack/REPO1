@@ -1,139 +1,192 @@
 # DJAR RVC Studio
 
-Portable Windows desktop controller for the local RVC API.
+**Professional portable Windows desktop workstation for your local RVC API.**
 
 ---
 
 ## 🇮🇷 راهنمای فارسی
 
-**DJAR RVC Studio** یک نرم‌افزار ویندوزی Portable برای اتصال ساده و مستقیم به RVC WebUI/API روی همان کامپیوتر است.
+**DJAR RVC Studio** یک نرم‌افزار ویندوزی Portable با رابط مدرن و حرفه‌ای برای کنترل RVC WebUI/API روی همان کامپیوتر است. این نسخه با یک رابط دسکتاپ مدرن ساخته شده و برای استفاده روزمره در تبدیل صدا طراحی شده است.
 
-> **نکته مهم:** این برنامه خودِ موتور RVC، مدل‌های Voice و فایل‌های سنگین مدل را داخل خود ندارد. RVC روی ویندوز شما اجرا می‌شود و برنامه از طریق API به آن متصل می‌شود.
+> **مهم:** این برنامه موتور RVC و مدل‌های Voice را داخل خود ندارد. RVC روی کامپیوتر شما اجرا می‌شود و DJAR RVC Studio از طریق API محلی به آن متصل می‌شود.
 
-### ⬇️ دانلود نسخه Portable
+### ✨ امکانات
 
-**[دانلود DJAR RVC Studio Portable از GitHub Actions](https://github.com/ahmadrezahsnz81-stack/REPO1/actions/workflows/build-windows.yml)**
-
-برای دانلود:
-
-1. روی لینک بالا وارد GitHub Actions شوید.
-2. آخرین اجرای موفق با وضعیت **Success** را باز کنید.
-3. پایین صفحه، بخش **Artifacts** را پیدا کنید.
-4. روی **DJAR-RVC-Studio-Portable** کلیک کنید.
-5. فایل ZIP دانلودشده را در یک پوشه معمولی مثل `Downloads` یا Desktop ذخیره کنید.
-6. ZIP را با Windows Explorer یا WinRAR روی هارد استخراج کنید.
-7. بعد از Extract، وارد پوشه **DJAR RVC Studio** شوید.
-8. فایل **`DJAR RVC Studio.exe`** را اجرا کنید.
-
-> **توجه:** نسخه جدید Artifact مستقیماً پوشه Portable را ارائه می‌کند و دیگر نباید یک ZIP داخلی را از داخل ZIP دیگری باز یا استخراج کنید.
-
-### 🖥️ پیش‌نیازها
-
-- Windows 10 یا Windows 11
-- RVC WebUI/API روی همان کامپیوتر
-- API باید روی پورت `7897` فعال باشد.
-- آدرس پیش‌فرض اتصال برنامه:
-  `http://127.0.0.1:7897`
-
-### 🔌 اتصال به RVC
-
-اگر RVC WebUI شما روی پورت پیش‌فرض اجرا می‌شود، نیازی به تغییر چیزی نیست.
-
-برنامه به این آدرس متصل می‌شود:
-
-`http://127.0.0.1:7897`
-
-ابتدا داخل برنامه **Test Connection** را بزنید. اگر اتصال موفق باشد، می‌توانید تبدیل صدا را انجام دهید.
-
-### 🎙️ امکانات فعلی
-
-- Native Windows GUI
-- اتصال به Local RVC API
-- انتخاب Voice / Speaker ID
+- رابط گرافیکی مدرن و Dark
+- وضعیت لحظه‌ای اتصال RVC
+- تست اتصال با یک کلیک
+- انتخاب Voice / Speaker
+- Refresh مدل‌ها / Voiceها
 - انتخاب فایل صوتی
-- F0 Method:
-  - RMVPE
-  - CREPE
-  - Harvest
-  - PM
-- Pitch / Transpose
+- F0: RMVPE، CREPE، Harvest، PM
+- Pitch / Transpose از -12 تا +12
 - Index / Feature Ratio
-- Protect
+- Protect Breath / Consonants
 - Median Filter
 - Resample Rate
 - Volume Envelope Mix
-- تست اتصال به RVC
-- دریافت خروجی تبدیل‌شده
+- انتخاب Feature Index
+- نوار پیشرفت تبدیل
+- نمایش وضعیت عملیات
+- ذخیره خودکار تنظیمات برنامه
+- ذخیره خروجی در پوشه `DJAR_RVC_Output`
+- باز کردن مستقیم پوشه خروجی
+- بدون نیاز به نصب Python
 
-### 🧩 معماری اتصال
+### ⬇️ دانلود نسخه Portable
+
+**[دانلود DJAR RVC Studio از GitHub Actions](https://github.com/ahmadrezahsnz81-stack/REPO1/actions/workflows/build-windows.yml)**
+
+مراحل:
+
+1. وارد صفحه GitHub Actions شوید.
+2. آخرین اجرای **Success** را باز کنید.
+3. پایین صفحه قسمت **Artifacts** را پیدا کنید.
+4. روی **DJAR-RVC-Studio-Portable** کلیک کنید.
+5. فایل ZIP را کامل روی کامپیوتر ذخیره کنید.
+6. روی ZIP راست‌کلیک و **Extract All** را انتخاب کنید.
+7. وارد پوشه `DJAR RVC Studio` شوید.
+8. فایل **`DJAR RVC Studio.exe`** را اجرا کنید.
+
+### 🖥️ پیش‌نیاز
+
+- Windows 10 / 11
+- RVC WebUI/API روی همان کامپیوتر
+- API روی پورت `7897`
+- آدرس پیش‌فرض:
+  `http://127.0.0.1:7897`
+
+Python جداگانه لازم نیست.
+
+### 🔌 راه‌اندازی
+
+**مرحله ۱ — RVC را اجرا کنید**
+
+ابتدا RVC WebUI/API خودتان را اجرا کنید و مطمئن شوید API روی پورت 7897 در دسترس است.
+
+**مرحله ۲ — DJAR RVC Studio را اجرا کنید**
+
+برنامه را باز کنید. در بالای برنامه آدرس API قرار دارد:
+
+`http://127.0.0.1:7897`
+
+اگر RVC روی پورت دیگری اجرا می‌شود، همان‌جا آدرس را تغییر دهید.
+
+**مرحله ۳ — تست اتصال**
+
+روی **Test Connection** بزنید. در صورت موفقیت، وضعیت بالای برنامه به **RVC CONNECTED** تغییر می‌کند.
+
+**مرحله ۴ — انتخاب Voice**
+
+روی **Refresh** بزنید تا لیست Voice/مدل‌های قابل دریافت از RVC تازه شود. در صورت عدم ارائه لیست توسط نسخه RVC، می‌توانید Speaker ID موجود را استفاده کنید.
+
+**مرحله ۵ — انتخاب صدا**
+
+فایل WAV، MP3، FLAC، OGG یا M4A را انتخاب کنید.
+
+**مرحله ۶ — تنظیم پارامترها**
+
+Pitch، Index، Protect و تنظیمات Advanced را مطابق مدل و پروژه تنظیم کنید.
+
+**مرحله ۷ — تبدیل**
+
+روی **CONVERT AUDIO** بزنید. فایل خروجی در کنار فایل اصلی، داخل پوشه:
+
+`DJAR_RVC_Output`
+
+ذخیره می‌شود.
+
+### 📁 محل خروجی
+
+مثلاً اگر فایل شما این باشد:
+
+`D:\Music\input.wav`
+
+خروجی در این مسیر قرار می‌گیرد:
+
+`D:\Music\DJAR_RVC_Output\input_RVC.wav`
+
+### 🧩 معماری
 
 ```text
-DJAR روی cPanel
-       │
-       │  Job / Request
-       ▼
-DJAR RVC Studio روی Windows
-       │
-       │  HTTP API
-       ▼
-RVC WebUI / API :7897
-       │
-       ▼
-Voice Conversion
-       │
-       ▼
-Output Audio
+Telegram / DJAR (cPanel)
+          │
+          │  Job / Request
+          ▼
+   DJAR RVC Studio
+        Windows
+          │
+          │ HTTP API
+          ▼
+   RVC WebUI / API
+      127.0.0.1:7897
+          │
+          ▼
+   Voice Conversion
+          │
+          ▼
+     Output Audio
 ```
 
-در نسخه فعلی، **DJAR RVC Studio فقط رابط ویندوز و Bridge سمت RVC است**. اتصال واقعی ربات DJAR روی cPanel به این برنامه در مرحله بعدی قابل اضافه شدن است.
+نسخه فعلی نرم‌افزار رابط دسکتاپ و Bridge سمت RVC است. اتصال مستقیم و امن DJAR روی cPanel به این برنامه می‌تواند در نسخه بعدی اضافه شود.
 
-### ❗ اگر برنامه یا استخراج فایل مشکل داشت
+### ❗ عیب‌یابی
 
-**خطای WinRAR مثل `The system cannot find the path specified`:**
+**RVC CONNECTED نمی‌شود:**
 
-1. فایل ZIP را مستقیماً از داخل مرورگر اجرا نکنید.
-2. ابتدا آن را کامل در `Downloads` ذخیره کنید.
-3. روی فایل ZIP راست‌کلیک کنید و **Extract All** یا **Extract to...** را بزنید.
-4. اگر WinRAR فایل را از یک مسیر موقت باز کرده، WinRAR را ببندید و ZIP را دوباره از محل ذخیره‌شده روی هارد باز کنید.
-5. اگر باز هم خطا داشت، ZIP را دوباره دانلود کنید و مطمئن شوید دانلود کامل شده است.
+1. RVC را اجرا کنید.
+2. پورت API را بررسی کنید.
+3. آدرس داخل برنامه را بررسی کنید.
+4. Windows Firewall را بررسی کنید.
+5. دوباره Test Connection را بزنید.
 
-**اگر برنامه به RVC وصل نشد:**
+**فایل تبدیل نمی‌شود:**
 
-1. مطمئن شوید RVC WebUI در حال اجراست.
-2. مطمئن شوید API روی پورت `7897` فعال است.
-3. اگر پورت RVC را تغییر داده‌اید، آدرس API داخل برنامه را اصلاح کنید.
-4. در Windows Firewall دسترسی برنامه را بررسی کنید.
-5. دوباره **Test Connection** را اجرا کنید.
+1. مطمئن شوید فایل صوتی واقعاً وجود دارد.
+2. Voice/Speaker ID را بررسی کنید.
+3. Feature Index را فقط در صورت نیاز انتخاب کنید.
+4. لاگ خطای نمایش‌داده‌شده توسط برنامه را بررسی کنید.
+
+**WinRAR خطای `The system cannot find the path specified` می‌دهد:**
+
+ZIP را ابتدا کامل روی هارد ذخیره کنید و بعد Extract کنید؛ فایل را مستقیماً از داخل مسیر موقت مرورگر یا پنجره WinRAR باز نکنید.
 
 ---
 
-## 🇬🇧 English Guide
+## 🇬🇧 English
 
-**DJAR RVC Studio** is a portable Windows desktop controller for a local RVC WebUI/API instance.
+DJAR RVC Studio is a modern portable Windows desktop workstation for controlling a local RVC WebUI/API instance.
 
-### Download
+### Features
 
-**[Download the latest Portable build from GitHub Actions](https://github.com/ahmadrezahsnz81-stack/REPO1/actions/workflows/build-windows.yml)**
-
-Open the latest successful workflow run, find **Artifacts**, download **DJAR-RVC-Studio-Portable**, save it to a normal local folder, extract it, open the **DJAR RVC Studio** folder, and run:
-
-`DJAR RVC Studio.exe`
-
-The latest workflow uploads the portable folder directly, avoiding a ZIP-inside-a-ZIP package.
+- Modern dark desktop UI
+- RVC connection status
+- Connection test
+- Voice/Speaker selection and refresh
+- RMVPE / CREPE / Harvest / PM
+- Pitch / transpose
+- Index / feature ratio
+- Protect
+- Median filter
+- Resample rate
+- Volume envelope mix
+- Feature index selection
+- Conversion progress
+- Persistent settings
+- Output folder management
 
 ### Requirements
 
 - Windows 10 or Windows 11
-- RVC WebUI/API running locally
-- Default API endpoint: `http://127.0.0.1:7897`
+- Local RVC WebUI/API
+- Default API: `http://127.0.0.1:7897`
+- Python is not required separately.
 
-### Build
+### Download
 
-GitHub Actions automatically builds the portable Windows package on pushes to `main` and on manual workflow runs.
+**[Download the latest Portable build](https://github.com/ahmadrezahsnz81-stack/REPO1/actions/workflows/build-windows.yml)**
 
-The application is packaged with PyInstaller and does not require Python to be installed separately.
-
-RVC itself remains local on the Windows machine. The desktop application calls the RVC API documented for port `7897`.
+Open the latest successful workflow, download `DJAR-RVC-Studio-Portable`, extract it, open the `DJAR RVC Studio` folder, and run `DJAR RVC Studio.exe`.
 
 ---
 
