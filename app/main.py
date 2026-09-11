@@ -1,53 +1,42 @@
 import base64
 import json
 import os
-import subprocess
 import sys
-import threading
 from pathlib import Path
 
 import requests
 from PySide6.QtCore import QObject, Qt, QThread, Signal, QUrl
 from PySide6.QtGui import QDesktopServices, QFont
-from PySide6.QtWidgets import (
-    QApplication, QComboBox, QFileDialog, QFrame, QGridLayout, QHBoxLayout,
-    QLabel, QLineEdit, QMainWindow, QMessageBox, QProgressBar, QPushButton,
-    QScrollArea, QSlider, QSpinBox, QDoubleSpinBox, QVBoxLayout, QWidget
-)
+from PySide6.QtWidgets import QApplication, QFileDialog, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QMainWindow, QMessageBox, QProgressBar, QPushButton, QComboBox, QScrollArea, QSlider, QVBoxLayout, QWidget
 
 APP_TITLE = "DJAR RVC Studio"
 DEFAULT_API = "http://127.0.0.1:7897"
-CONFIG_DIR = Path(os.getenv("APPDATA", Path.home())) / "DJAR RVC Studio"
+CONFIG_DIR = Path(os.getenv("APPDATA", str(Path.home()))) / "DJAR RVC Studio"
 CONFIG_FILE = CONFIG_DIR / "settings.json"
 
-STYLESHEET = """
-QMainWindow, QWidget { background:#0b0e13; color:#e9edf5; font-family:'Segoe UI'; font-size:10pt; }
-QScrollArea { border:0; background:#0b0e13; }
-QFrame#topbar { background:#0f131a; border-bottom:1px solid #242b36; }
-QFrame#card { background:#121720; border:1px solid #242c38; border-radius:14px; }
-QFrame#drop { background:#0e131b; border:1px dashed #394657; border-radius:12px; }
-QLabel#title { color:#ffffff; font-size:25pt; font-weight:700; }
-QLabel#subtitle { color:#8792a5; font-size:9.5pt; }
-QLabel#section { color:#f4f7fb; font-size:11pt; font-weight:700; }
-QLabel#muted { color:#7f8a9d; }
-QLabel#value { color:#dbe2ed; font-weight:600; }
-QLabel#statusOnline { color:#5ee28a; font-weight:700; }
-QLabel#statusOffline { color:#ff7181; font-weight:700; }
-QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox { background:#0c1016; color:#e8edf5; border:1px solid #2b3441; border-radius:8px; padding:9px 10px; min-height:18px; }
-QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus { border:1px solid #6f7cff; }
-QComboBox QAbstractItemView { background:#111720; color:#e8edf5; selection-background-color:#343d75; }
-QPushButton { background:#1a212c; color:#e9edf5; border:1px solid #303a48; border-radius:8px; padding:9px 14px; font-weight:600; }
-QPushButton:hover { background:#222b38; border-color:#46546a; }
-QPushButton:pressed { background:#151b23; }
-QPushButton#primary { background:#6975ff; border:1px solid #7e88ff; color:white; padding:13px; font-size:11pt; font-weight:700; }
-QPushButton#primary:hover { background:#7a85ff; }
-QPushButton#ghost { background:transparent; border:0; color:#9ca8ba; padding:6px; }
-QProgressBar { background:#0b1016; border:0; border-radius:5px; height:9px; text-align:center; color:transparent; }
-QProgressBar::chunk { background:#6975ff; border-radius:5px; }
-QSlider::groove:horizontal { height:4px; background:#2a3340; border-radius:2px; }
-QSlider::handle:horizontal { width:16px; height:16px; margin:-6px 0; background:#e9edf5; border-radius:8px; }
-QSlider::sub-page:horizontal { background:#6975ff; border-radius:2px; }
-QFrame#pill { background:#151c26; border:1px solid #293341; border-radius:9px; }
+STYLE = """
+QMainWindow,QWidget{background:#0a0d12;color:#e8edf5;font-family:'Segoe UI';font-size:10pt}
+QFrame#top{background:#0e1219;border-bottom:1px solid #242b36}
+QFrame#card{background:#121821;border:1px solid #252e3a;border-radius:14px}
+QFrame#drop{background:#0d131b;border:1px dashed #3b485a;border-radius:12px}
+QLabel#title{font-size:26pt;font-weight:700;color:#fff}
+QLabel#subtitle,QLabel#muted{color:#8490a3}
+QLabel#section{font-size:11pt;font-weight:700;color:#f4f7fb}
+QLabel#value{font-weight:700;color:#dce4ef}
+QLabel#online{font-weight:700;color:#5ee58a}
+QLabel#offline{font-weight:700;color:#ff7180}
+QLineEdit,QComboBox{background:#0b1016;color:#e8edf5;border:1px solid #2b3543;border-radius:8px;padding:9px 10px}
+QLineEdit:focus,QComboBox:focus{border:1px solid #707bff}
+QComboBox QAbstractItemView{background:#111720;color:#fff;selection-background-color:#353f78}
+QPushButton{background:#19212c;color:#e8edf5;border:1px solid #303b49;border-radius:8px;padding:9px 14px;font-weight:600}
+QPushButton:hover{background:#232d3a;border-color:#48576c}
+QPushButton#primary{background:#6975ff;color:white;border:1px solid #7e88ff;padding:13px;font-size:11pt;font-weight:700}
+QPushButton#primary:hover{background:#7a85ff}
+QProgressBar{background:#0a0f15;border:0;border-radius:5px;height:9px;text-align:center;color:transparent}
+QProgressBar::chunk{background:#6975ff;border-radius:5px}
+QSlider::groove:horizontal{height:4px;background:#293340;border-radius:2px}
+QSlider::sub-page:horizontal{background:#6975ff;border-radius:2px}
+QSlider::handle:horizontal{width:16px;height:16px;margin:-6px 0;background:#edf1f7;border-radius:8px}
 """
 
 
@@ -61,7 +50,7 @@ def load_settings():
 def save_settings(data):
     try:
         CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-        CONFIG_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        CONFIG_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
     except Exception:
         pass
 
@@ -78,372 +67,186 @@ class Worker(QObject):
     def run(self):
         try:
             self.finished.emit(self.fn(self.progress))
-        except Exception as e:
-            self.failed.emit(str(e))
+        except Exception as exc:
+            self.failed.emit(str(exc))
 
 
-class MainWindow(QMainWindow):
+class App(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle(APP_TITLE)
-        self.resize(1180, 780)
+        self.resize(1180, 800)
         self.setMinimumSize(980, 680)
-        self.settings = load_settings()
+        self.setStyleSheet(STYLE)
         self.last_output = ""
-        self.setStyleSheet(STYLESHEET)
-        self.build_ui()
-        self.restore_settings()
+        self.saved = load_settings()
+        self.thread = None
+        self.build()
+        self.restore()
 
-    def build_ui(self):
+    def make_label(self, text, name=None):
+        label = QLabel(text)
+        if name:
+            label.setObjectName(name)
+        return label
+
+    def build(self):
         root = QWidget()
-        root_layout = QVBoxLayout(root)
-        root_layout.setContentsMargins(0, 0, 0, 0)
-        root_layout.setSpacing(0)
+        outer = QVBoxLayout(root)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(0)
         self.setCentralWidget(root)
 
-        top = QFrame(objectName="topbar")
-        top_layout = QHBoxLayout(top)
-        top_layout.setContentsMargins(28, 20, 28, 18)
+        top = QFrame(); top.setObjectName("top")
+        tl = QHBoxLayout(top); tl.setContentsMargins(28, 20, 28, 18)
         brand = QVBoxLayout()
-        title = QLabel("DJAR RVC Studio", objectName="title")
-        subtitle = QLabel("Professional local voice conversion workstation", objectName="subtitle")
-        brand.addWidget(title)
-        brand.addWidget(subtitle)
-        top_layout.addLayout(brand)
-        top_layout.addStretch()
-        self.connection_badge = QLabel("●  DISCONNECTED", objectName="statusOffline")
-        self.connection_badge.setAlignment(Qt.AlignCenter)
-        top_layout.addWidget(self.connection_badge)
-        root_layout.addWidget(top)
+        brand.addWidget(self.make_label("DJAR RVC Studio", "title"))
+        brand.addWidget(self.make_label("Professional local voice conversion workstation", "subtitle"))
+        tl.addLayout(brand); tl.addStretch()
+        self.badge = self.make_label("●  RVC OFFLINE", "offline")
+        tl.addWidget(self.badge)
+        outer.addWidget(top)
 
-        api_bar = QFrame()
-        api_layout = QHBoxLayout(api_bar)
-        api_layout.setContentsMargins(28, 12, 28, 12)
-        api_layout.addWidget(QLabel("RVC API"))
-        self.api_edit = QLineEdit(DEFAULT_API)
-        self.api_edit.setPlaceholderText(DEFAULT_API)
-        api_layout.addWidget(self.api_edit, 1)
-        self.test_btn = QPushButton("Test Connection")
-        self.test_btn.clicked.connect(self.test_connection)
-        api_layout.addWidget(self.test_btn)
-        root_layout.addWidget(api_bar)
+        api = QFrame()
+        al = QHBoxLayout(api); al.setContentsMargins(28, 12, 28, 12)
+        al.addWidget(QLabel("RVC API"))
+        self.api = QLineEdit(DEFAULT_API); self.api.setPlaceholderText(DEFAULT_API)
+        al.addWidget(self.api, 1)
+        self.test_btn = QPushButton("Test Connection"); self.test_btn.clicked.connect(self.test_connection)
+        al.addWidget(self.test_btn)
+        outer.addWidget(api)
 
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        content = QWidget()
-        content_layout = QVBoxLayout(content)
-        content_layout.setContentsMargins(28, 12, 28, 28)
-        content_layout.setSpacing(16)
-        scroll.setWidget(content)
-        root_layout.addWidget(scroll, 1)
+        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setFrameShape(QFrame.NoFrame)
+        content = QWidget(); cl = QVBoxLayout(content); cl.setContentsMargins(28, 10, 28, 28); cl.setSpacing(16)
+        scroll.setWidget(content); outer.addWidget(scroll, 1)
 
-        grid = QGridLayout()
-        grid.setHorizontalSpacing(16)
-        grid.setVerticalSpacing(16)
-        grid.setColumnStretch(0, 1)
-        grid.setColumnStretch(1, 1)
-        content_layout.addLayout(grid)
+        grid = QGridLayout(); grid.setHorizontalSpacing(16); grid.setVerticalSpacing(16); grid.setColumnStretch(0, 1); grid.setColumnStretch(1, 1); cl.addLayout(grid)
 
-        left = self.card("VOICE & AUDIO")
-        ll = left.layout()
-        ll.addWidget(self.section_label("Voice model"))
-        voice_row = QHBoxLayout()
-        self.voice_combo = QComboBox()
-        self.voice_combo.addItem("Voice / Speaker ID 0", "0")
-        voice_row.addWidget(self.voice_combo, 1)
-        self.refresh_btn = QPushButton("↻  Refresh")
-        self.refresh_btn.clicked.connect(self.refresh_voices)
-        voice_row.addWidget(self.refresh_btn)
-        ll.addLayout(voice_row)
-        ll.addSpacing(8)
-        ll.addWidget(self.section_label("Input audio"))
-        drop = QFrame(objectName="drop")
-        dl = QVBoxLayout(drop)
-        dl.setContentsMargins(18, 20, 18, 20)
-        self.audio_label = QLabel("🎵  No audio selected")
-        self.audio_label.setAlignment(Qt.AlignCenter)
-        self.audio_label.setObjectName("muted")
-        dl.addWidget(self.audio_label)
-        browse = QPushButton("Browse audio file")
-        browse.clicked.connect(self.pick_audio)
-        dl.addWidget(browse)
+        left = self.card("VOICE & AUDIO"); ll = left.layout()
+        ll.addWidget(self.make_label("Voice model", "section"))
+        vr = QHBoxLayout()
+        self.voice = QComboBox(); self.voice.addItem("Voice / Speaker ID 0", "0")
+        vr.addWidget(self.voice, 1)
+        self.refresh_btn = QPushButton("↻  Refresh"); self.refresh_btn.clicked.connect(self.refresh_voices); vr.addWidget(self.refresh_btn)
+        ll.addLayout(vr)
+        ll.addSpacing(7); ll.addWidget(self.make_label("Input audio", "section"))
+        drop = QFrame(); drop.setObjectName("drop")
+        dl = QVBoxLayout(drop); dl.setContentsMargins(18, 20, 18, 20)
+        self.audio_name = self.make_label("🎵  No audio selected", "muted"); self.audio_name.setAlignment(Qt.AlignCenter); dl.addWidget(self.audio_name)
+        b = QPushButton("Browse audio file"); b.clicked.connect(self.pick_audio); dl.addWidget(b)
         ll.addWidget(drop)
-        self.audio_path = QLineEdit()
-        self.audio_path.setVisible(False)
-        ll.addWidget(self.audio_path)
-        ll.addSpacing(8)
-        ll.addWidget(self.section_label("F0 algorithm"))
-        self.f0_combo = QComboBox()
-        self.f0_combo.addItems(["RMVPE", "CREPE", "Harvest", "PM"])
-        self.f0_combo.setCurrentIndex(0)
-        ll.addWidget(self.f0_combo)
+        self.audio_path = QLineEdit(); self.audio_path.hide(); ll.addWidget(self.audio_path)
+        ll.addSpacing(7); ll.addWidget(self.make_label("F0 algorithm", "section"))
+        self.f0 = QComboBox(); self.f0.addItems(["RMVPE", "CREPE", "Harvest", "PM"]); ll.addWidget(self.f0)
         grid.addWidget(left, 0, 0)
 
-        right = self.card("VOICE CONTROL")
-        rl = right.layout()
-        self.pitch_slider, self.pitch_value = self.add_slider(rl, "Pitch / Transpose", -12, 12, 0, " semitones")
-        self.index_slider, self.index_value = self.add_slider(rl, "Index / Feature ratio", 0, 100, 75, "%")
-        self.protect_slider, self.protect_value = self.add_slider(rl, "Protect breath / consonants", 0, 50, 33, "%")
-        rl.addSpacing(4)
-        adv_title = QHBoxLayout()
-        adv_title.addWidget(self.section_label("Advanced settings"))
-        adv_title.addStretch()
-        rl.addLayout(adv_title)
-        self.filter_slider, self.filter_value = self.add_slider(rl, "Median filter radius", 0, 7, 3, "")
-        self.resample_slider, self.resample_value = self.add_slider(rl, "Resample rate", 0, 48000, 0, " Hz")
-        self.rms_slider, self.rms_value = self.add_slider(rl, "Volume envelope mix", 0, 100, 25, "%")
-        rl.addWidget(self.section_label("Feature index"))
-        idxrow = QHBoxLayout()
-        self.index_path = QLineEdit()
-        self.index_path.setPlaceholderText("Optional .index file")
-        idxrow.addWidget(self.index_path, 1)
-        idxbtn = QPushButton("Browse")
-        idxbtn.clicked.connect(self.pick_index)
-        idxrow.addWidget(idxbtn)
-        rl.addLayout(idxrow)
+        right = self.card("VOICE CONTROL"); rl = right.layout()
+        self.pitch = self.slider(rl, "Pitch / Transpose", -12, 12, 0, " semitones")
+        self.index_rate = self.slider(rl, "Index / Feature ratio", 0, 100, 75, "%")
+        self.protect = self.slider(rl, "Protect breath / consonants", 0, 50, 33, "%")
+        rl.addSpacing(3); rl.addWidget(self.make_label("ADVANCED SETTINGS", "section"))
+        self.filter_radius = self.slider(rl, "Median filter radius", 0, 7, 3, "")
+        self.resample = self.slider(rl, "Resample rate", 0, 48000, 0, " Hz")
+        self.rms = self.slider(rl, "Volume envelope mix", 0, 100, 25, "%")
+        rl.addWidget(self.make_label("Feature index", "section"))
+        ir = QHBoxLayout(); self.index_path = QLineEdit(); self.index_path.setPlaceholderText("Optional .index file"); ir.addWidget(self.index_path, 1)
+        ib = QPushButton("Browse"); ib.clicked.connect(self.pick_index); ir.addWidget(ib); rl.addLayout(ir)
         grid.addWidget(right, 0, 1)
 
-        output = self.card("CONVERSION")
-        ol = output.layout()
-        status_row = QHBoxLayout()
-        self.status_label = QLabel("Ready")
-        self.status_label.setObjectName("muted")
-        status_row.addWidget(self.status_label)
-        status_row.addStretch()
-        self.percent_label = QLabel("0%", objectName="value")
-        status_row.addWidget(self.percent_label)
-        ol.addLayout(status_row)
-        self.progress = QProgressBar()
-        self.progress.setRange(0, 100)
-        self.progress.setValue(0)
-        ol.addWidget(self.progress)
-        btnrow = QHBoxLayout()
-        self.convert_btn = QPushButton("✦  CONVERT AUDIO", objectName="primary")
-        self.convert_btn.clicked.connect(self.convert)
-        btnrow.addWidget(self.convert_btn, 2)
-        self.output_btn = QPushButton("Open Output")
-        self.output_btn.clicked.connect(self.open_output)
-        btnrow.addWidget(self.output_btn, 1)
-        ol.addLayout(btnrow)
-        content_layout.addWidget(output)
-
-        tip = QLabel("RVC stays on your PC. DJAR RVC Studio communicates with the local API and saves converted audio beside your source file.", objectName="muted")
-        tip.setWordWrap(True)
-        content_layout.addWidget(tip)
+        conv = self.card("CONVERSION"); cv = conv.layout()
+        sr = QHBoxLayout(); self.status = self.make_label("Ready", "muted"); sr.addWidget(self.status); sr.addStretch(); self.percent = self.make_label("0%", "value"); sr.addWidget(self.percent); cv.addLayout(sr)
+        self.progress = QProgressBar(); self.progress.setValue(0); cv.addWidget(self.progress)
+        br = QHBoxLayout(); self.convert_btn = QPushButton("✦  CONVERT AUDIO"); self.convert_btn.setObjectName("primary"); self.convert_btn.clicked.connect(self.convert); br.addWidget(self.convert_btn, 2)
+        ob = QPushButton("Open Output"); ob.clicked.connect(self.open_output); br.addWidget(ob, 1); cv.addLayout(br)
+        cl.addWidget(conv)
+        cl.addWidget(self.make_label("RVC remains local on this Windows PC. Converted files are saved in DJAR_RVC_Output beside the source audio.", "muted"))
 
     def card(self, title):
-        frame = QFrame(objectName="card")
-        layout = QVBoxLayout(frame)
-        layout.setContentsMargins(20, 18, 20, 20)
-        layout.setSpacing(9)
-        layout.addWidget(self.section_label(title))
-        return frame
+        frame = QFrame(); frame.setObjectName("card")
+        layout = QVBoxLayout(frame); layout.setContentsMargins(20, 18, 20, 20); layout.setSpacing(9)
+        layout.addWidget(self.make_label(title, "section")); return frame
 
-    def section_label(self, text):
-        return QLabel(text, objectName="section")
+    def slider(self, layout, label, lo, hi, value, suffix):
+        box = QVBoxLayout(); head = QHBoxLayout(); head.addWidget(QLabel(label)); head.addStretch()
+        value_label = self.make_label(f"{value}{suffix}", "value"); head.addWidget(value_label); box.addLayout(head)
+        s = QSlider(Qt.Horizontal); s.setRange(lo, hi); s.setValue(value)
+        s.valueChanged.connect(lambda v, out=value_label, suf=suffix: out.setText(f"{v}{suf}")); box.addWidget(s); layout.addLayout(box); return s
 
-    def add_slider(self, layout, label, lo, hi, value, suffix):
-        row = QVBoxLayout()
-        head = QHBoxLayout()
-        lab = QLabel(label)
-        val = QLabel(objectName="value")
-        val.setText(f"{value}{suffix}")
-        head.addWidget(lab)
-        head.addStretch()
-        head.addWidget(val)
-        row.addLayout(head)
-        slider = QSlider(Qt.Horizontal)
-        slider.setRange(lo, hi)
-        slider.setValue(value)
-        slider.valueChanged.connect(lambda x, v=val, s=suffix: v.setText(f"{x}{s}"))
-        row.addWidget(slider)
-        layout.addLayout(row)
-        return slider, val
+    def restore(self):
+        self.api.setText(self.saved.get("api", DEFAULT_API)); self.f0.setCurrentIndex(self.saved.get("f0", 0))
+        for widget, key, default in [(self.pitch,"pitch",0),(self.index_rate,"index_rate",75),(self.protect,"protect",33),(self.filter_radius,"filter",3),(self.resample,"resample",0),(self.rms,"rms",25)]:
+            widget.setValue(self.saved.get(key, default))
 
-    def restore_settings(self):
-        self.api_edit.setText(self.settings.get("api", DEFAULT_API))
-        self.f0_combo.setCurrentIndex(self.settings.get("f0", 0))
-        self.index_slider.setValue(self.settings.get("index_rate", 75))
-        self.protect_slider.setValue(self.settings.get("protect", 33))
-        self.filter_slider.setValue(self.settings.get("filter", 3))
-        self.resample_slider.setValue(self.settings.get("resample", 0))
-        self.rms_slider.setValue(self.settings.get("rms", 25))
-        self.pitch_slider.setValue(self.settings.get("pitch", 0))
+    def save(self):
+        save_settings({"api":self.api.text().strip(),"f0":self.f0.currentIndex(),"pitch":self.pitch.value(),"index_rate":self.index_rate.value(),"protect":self.protect.value(),"filter":self.filter_radius.value(),"resample":self.resample.value(),"rms":self.rms.value()})
 
-    def save_current_settings(self):
-        save_settings({
-            "api": self.api_edit.text().strip(), "f0": self.f0_combo.currentIndex(),
-            "index_rate": self.index_slider.value(), "protect": self.protect_slider.value(),
-            "filter": self.filter_slider.value(), "resample": self.resample_slider.value(),
-            "rms": self.rms_slider.value(), "pitch": self.pitch_slider.value()
-        })
+    def api_url(self, endpoint): return self.api.text().strip().rstrip("/") + endpoint
 
-    def api_url(self, path):
-        return self.api_edit.text().strip().rstrip("/") + path
-
-    def set_busy(self, busy):
-        self.convert_btn.setEnabled(not busy)
-        self.refresh_btn.setEnabled(not busy)
-        self.test_btn.setEnabled(not busy)
-
-    def run_worker(self, fn, finished):
-        thread = QThread(self)
-        worker = Worker(fn)
-        worker.moveToThread(thread)
-        thread.started.connect(worker.run)
-        worker.finished.connect(finished)
-        worker.failed.connect(self.worker_failed)
-        worker.finished.connect(thread.quit)
-        worker.failed.connect(thread.quit)
-        worker.finished.connect(worker.deleteLater)
-        worker.failed.connect(worker.deleteLater)
-        thread.finished.connect(thread.deleteLater)
-        thread.start()
-        self._thread = thread
+    def run(self, fn, done, progress=False):
+        self.thread = QThread(self); worker = Worker(fn); worker.moveToThread(self.thread); self.thread.started.connect(worker.run)
+        worker.finished.connect(done); worker.failed.connect(self.failed)
+        if progress: worker.progress.connect(self.update_progress)
+        worker.finished.connect(self.thread.quit); worker.failed.connect(self.thread.quit); worker.finished.connect(worker.deleteLater); worker.failed.connect(worker.deleteLater); self.thread.finished.connect(self.thread.deleteLater); self.thread.start()
 
     def test_connection(self):
-        self.status_label.setText("Testing RVC API…")
-        self.test_btn.setEnabled(False)
-        def work(progress):
-            r = requests.post(self.api_url("/run/infer_clean"), json={"data": []}, timeout=15)
-            r.raise_for_status()
-            return True
+        self.status.setText("Testing RVC API…"); self.test_btn.setEnabled(False)
+        def fn(p):
+            r=requests.post(self.api_url("/run/infer_clean"),json={"data":[]},timeout=15); r.raise_for_status(); return True
         def done(_):
-            self.test_btn.setEnabled(True)
-            self.connection_badge.setText("●  RVC CONNECTED")
-            self.connection_badge.setObjectName("statusOnline")
-            self.connection_badge.style().unpolish(self.connection_badge); self.connection_badge.style().polish(self.connection_badge)
-            self.status_label.setText("Connected to RVC API")
-        self.run_worker(work, done)
+            self.test_btn.setEnabled(True); self.badge.setText("●  RVC CONNECTED"); self.badge.setObjectName("online"); self.badge.style().unpolish(self.badge); self.badge.style().polish(self.badge); self.status.setText("Connected to RVC API")
+        self.run(fn, done)
 
     def refresh_voices(self):
-        self.status_label.setText("Refreshing voice models…")
-        def work(progress):
-            r = requests.post(self.api_url("/run/infer_refresh"), json={"data": []}, timeout=30)
-            r.raise_for_status()
-            return r.json().get("data", [])
+        self.status.setText("Refreshing voice list…")
+        def fn(p):
+            r=requests.post(self.api_url("/run/infer_refresh"),json={"data":[]},timeout=30); r.raise_for_status(); return r.json().get("data",[])
         def done(data):
-            self.voice_combo.clear()
-            values = []
-            if isinstance(data, list):
-                for item in data:
-                    text = str(item)
-                    if text.strip(): values.append(text)
-            if not values:
-                values = ["Voice / Speaker ID 0"]
-            for i, text in enumerate(values):
-                self.voice_combo.addItem(text, str(i))
-            self.status_label.setText(f"Voice list refreshed · {len(values)} option(s)")
-        self.run_worker(work, done)
+            self.voice.clear(); vals=[str(x) for x in data] if isinstance(data,list) else []
+            if not vals: vals=["Voice / Speaker ID 0"]
+            for i, name in enumerate(vals): self.voice.addItem(name, str(i))
+            self.status.setText(f"Voice list refreshed · {len(vals)} option(s)")
+        self.run(fn, done)
 
     def pick_audio(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Select audio", "", "Audio files (*.wav *.mp3 *.flac *.ogg *.m4a);;All files (*.*)")
-        if path:
-            self.audio_path.setText(path)
-            self.audio_label.setText("🎵  " + Path(path).name)
-            self.audio_label.setObjectName("value")
-            self.audio_label.style().unpolish(self.audio_label); self.audio_label.style().polish(self.audio_label)
+        path,_=QFileDialog.getOpenFileName(self,"Select audio","","Audio files (*.wav *.mp3 *.flac *.ogg *.m4a);;All files (*.*)")
+        if path: self.audio_path.setText(path); self.audio_name.setText("🎵  " + Path(path).name); self.audio_name.setObjectName("value"); self.audio_name.style().unpolish(self.audio_name); self.audio_name.style().polish(self.audio_name)
 
     def pick_index(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Select feature index", "", "Index files (*.index);;All files (*.*)")
+        path,_=QFileDialog.getOpenFileName(self,"Select feature index","","Index files (*.index);;All files (*.*)")
         if path: self.index_path.setText(path)
 
     def convert(self):
-        audio = self.audio_path.text().strip()
-        if not audio or not os.path.isfile(audio):
-            QMessageBox.warning(self, "Input required", "Please select a valid audio file first.")
-            return
-        self.save_current_settings()
-        self.set_busy(True)
-        self.progress.setValue(5)
-        self.percent_label.setText("5%")
-        self.status_label.setText("Preparing conversion…")
-        def work(progress):
-            progress.emit(15, "Sending audio to RVC…")
-            empty_f0 = {"name":"none.txt", "data":"data:text/plain;base64," + base64.b64encode(b"").decode()}
-            voice_id = self.voice_combo.currentData()
-            if voice_id is None: voice_id = "0"
-            payload = {"data":[
-                int(float(voice_id)), audio, self.pitch_slider.value(), empty_f0,
-                self.f0_combo.currentText().lower(), self.index_path.text().strip(),
-                "", self.index_slider.value()/100.0, self.filter_slider.value(),
-                self.resample_slider.value(), self.rms_slider.value()/100.0,
-                self.protect_slider.value()/100.0
-            ]}
-            progress.emit(25, "RVC is processing…")
-            r = requests.post(self.api_url("/run/infer_convert"), json=payload, timeout=3600)
-            r.raise_for_status()
-            obj = r.json()
-            data = obj.get("data", [])
-            audio_obj = data[1] if len(data) > 1 else None
-            if not isinstance(audio_obj, dict) or "data" not in audio_obj:
-                raise RuntimeError("RVC returned no converted audio data.")
-            raw = audio_obj["data"].split(",", 1)[-1]
-            out_dir = Path(audio).parent / "DJAR_RVC_Output"
-            out_dir.mkdir(parents=True, exist_ok=True)
-            out = out_dir / (Path(audio).stem + "_RVC.wav")
-            out.write_bytes(base64.b64decode(raw))
-            progress.emit(100, "Conversion complete")
-            return str(out)
-        def done(out):
-            self.set_busy(False)
-            self.last_output = out
-            self.progress.setValue(100)
-            self.percent_label.setText("100%")
-            self.status_label.setText("✓ Conversion complete")
-            box = QMessageBox(self)
-            box.setWindowTitle("Conversion complete")
-            box.setText("Your converted audio is ready.")
-            box.setInformativeText(out)
-            box.setStandardButtons(QMessageBox.Ok)
-            box.exec()
-        self._worker_progress = lambda p, msg: self.update_progress(p, msg)
-        def progress_done(_): pass
-        # Recreate worker explicitly to expose progress signals.
-        thread = QThread(self)
-        worker = Worker(work)
-        worker.moveToThread(thread)
-        thread.started.connect(worker.run)
-        worker.progress.connect(self.update_progress)
-        worker.finished.connect(done)
-        worker.failed.connect(self.worker_failed)
-        worker.finished.connect(thread.quit); worker.failed.connect(thread.quit)
-        worker.finished.connect(worker.deleteLater); worker.failed.connect(worker.deleteLater)
-        thread.finished.connect(thread.deleteLater)
-        thread.start(); self._thread = thread
+        audio=self.audio_path.text().strip()
+        if not audio or not os.path.isfile(audio): QMessageBox.warning(self,"Input required","Please select a valid audio file first."); return
+        self.save(); self.set_busy(True); self.update_progress(5,"Preparing conversion…")
+        def fn(progress):
+            progress.emit(15,"Sending request to RVC…")
+            empty={"name":"none.txt","data":"data:text/plain;base64,"+base64.b64encode(b"").decode()}
+            vid=self.voice.currentData() or "0"
+            payload={"data":[int(float(vid)),audio,self.pitch.value(),empty,self.f0.currentText().lower(),self.index_path.text().strip(),"",self.index_rate.value()/100.0,self.filter_radius.value(),self.resample.value(),self.rms.value()/100.0,self.protect.value()/100.0]}
+            progress.emit(25,"RVC is processing…")
+            r=requests.post(self.api_url("/run/infer_convert"),json=payload,timeout=3600); r.raise_for_status(); obj=r.json(); data=obj.get("data",[]); ao=data[1] if len(data)>1 else None
+            if not isinstance(ao,dict) or "data" not in ao: raise RuntimeError("RVC returned no converted audio data.")
+            raw=ao["data"].split(",",1)[-1]; out_dir=Path(audio).parent/"DJAR_RVC_Output"; out_dir.mkdir(exist_ok=True); out=out_dir/(Path(audio).stem+"_RVC.wav"); out.write_bytes(base64.b64decode(raw)); progress.emit(100,"Conversion complete"); return str(out)
+        self.run(fn, self.convert_done, True)
 
-    def update_progress(self, value, message):
-        self.progress.setValue(max(0, min(100, int(value))))
-        self.percent_label.setText(f"{int(value)}%")
-        self.status_label.setText(message)
+    def convert_done(self,out):
+        self.set_busy(False); self.last_output=out; self.update_progress(100,"✓ Conversion complete"); QMessageBox.information(self,"Conversion complete","Your converted audio is ready.\n\n"+out)
 
-    def worker_failed(self, msg):
-        self.set_busy(False)
-        self.progress.setValue(0)
-        self.percent_label.setText("0%")
-        self.status_label.setText("✕ Operation failed")
-        QMessageBox.critical(self, "RVC Error", msg)
+    def update_progress(self,value,msg): self.progress.setValue(int(value)); self.percent.setText(f"{int(value)}%"); self.status.setText(msg)
+
+    def failed(self,msg): self.set_busy(False); self.progress.setValue(0); self.percent.setText("0%"); self.status.setText("✕ Operation failed"); QMessageBox.critical(self,"RVC Error",msg)
+
+    def set_busy(self,busy): self.convert_btn.setEnabled(not busy); self.refresh_btn.setEnabled(not busy); self.test_btn.setEnabled(not busy)
 
     def open_output(self):
-        path = self.last_output
-        if not path:
-            audio = self.audio_path.text().strip()
-            if audio: path = str(Path(audio).parent / "DJAR_RVC_Output")
-        if path:
-            target = Path(path)
-            if target.is_file(): target = target.parent
-            target.mkdir(parents=True, exist_ok=True)
-            QDesktopServices.openUrl(QUrl.fromLocalFile(str(target)))
+        audio=self.audio_path.text().strip(); target=Path(self.last_output if self.last_output else (Path(audio).parent/"DJAR_RVC_Output" if audio else ""))
+        if not str(target): return
+        if target.is_file(): target=target.parent
+        target.mkdir(parents=True,exist_ok=True); QDesktopServices.openUrl(QUrl.fromLocalFile(str(target)))
 
-    def closeEvent(self, event):
-        self.save_current_settings()
-        event.accept()
+    def closeEvent(self,event): self.save(); event.accept()
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    app.setApplicationName(APP_TITLE)
-    app.setFont(QFont("Segoe UI", 10))
-    win = MainWindow()
-    win.show()
-    sys.exit(app.exec())
+    app=QApplication(sys.argv); app.setApplicationName(APP_TITLE); app.setFont(QFont("Segoe UI",10)); window=App(); window.show(); sys.exit(app.exec())
