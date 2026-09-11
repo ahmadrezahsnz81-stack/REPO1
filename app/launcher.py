@@ -1,4 +1,5 @@
 import socket
+from urllib.parse import urlparse
 
 from PySide6.QtWidgets import QApplication, QMessageBox
 
@@ -6,12 +7,17 @@ import studio_v2
 
 
 def test_connection(self):
+    """Fast, deterministic local TCP health check.
+
+    We intentionally do not use the RVC action endpoints or an HTTP request here.
+    The only question for this button is: is something listening on the configured
+    host/port? This avoids the previous worker/HTTP hang entirely.
+    """
     api = self.api.text().strip().rstrip("/")
     if not api:
         QMessageBox.warning(self, "RVC API", "Enter the RVC API address first.")
         return
 
-    from urllib.parse import urlparse
     parsed = urlparse(api)
     host = parsed.hostname or "127.0.0.1"
     port = parsed.port or (443 if parsed.scheme == "https" else 80)
@@ -19,31 +25,28 @@ def test_connection(self):
     self.test_btn.setEnabled(False)
     self.set_badge("●  RVC CHECKING...", "checking")
     self.status.setText(f"Checking {host}:{port} ...")
+    QApplication.processEvents()
 
-    def fn(progress):
-        with socket.create_connection((host, port), timeout=1.5):
+    try:
+        # Direct TCP check. Localhost should return almost immediately.
+        with socket.create_connection((host, port), timeout=1.0):
             pass
-        try:
-            r = studio_v2.requests.get(api, timeout=2, allow_redirects=True)
-            return r.status_code
-        except Exception:
-            return None
-
-    def done(code):
-        self.test_btn.setEnabled(True)
-        self.set_badge("●  RVC CONNECTED", "online")
-        if code is None:
-            self.status.setText(f"RVC service reachable · TCP {port} · HTTP check skipped")
-        else:
-            self.status.setText(f"RVC service reachable · TCP {port} · HTTP {code}")
-
-    def failed(message):
+    except OSError as exc:
         self.test_btn.setEnabled(True)
         self.set_badge("●  RVC OFFLINE", "offline")
-        self.status.setText("RVC connection failed")
-        QMessageBox.critical(self, "RVC Connection Failed", f"Could not reach RVC at:\n{api}\n\n{message}")
+        self.status.setText(f"RVC offline · {host}:{port}")
+        QMessageBox.critical(
+            self,
+            "RVC Connection Failed",
+            f"RVC is not reachable at:\n{api}\n\n"
+            f"{exc}\n\n"
+            f"Make sure the RVC WebUI/API is running on port {port}."
+        )
+        return
 
-    self.run(fn, done)
+    self.test_btn.setEnabled(True)
+    self.set_badge("●  RVC CONNECTED", "online")
+    self.status.setText(f"RVC connected · TCP {host}:{port}")
 
 
 studio_v2.App.test_connection = test_connection
@@ -52,7 +55,7 @@ _original_init = studio_v2.App.__init__
 
 
 def init(self):
-    # Suppress the old startup timer so connection testing is manual only.
+    # Suppress the legacy automatic startup timer while constructing the window.
     original_single_shot = studio_v2.QTimer.singleShot
     studio_v2.QTimer.singleShot = staticmethod(lambda *args, **kwargs: None)
     try:
