@@ -24,12 +24,12 @@ jobs:
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
-          pip install requests PySide6 pyinstaller
+          pip install requests PySide6 numpy soundfile pyinstaller
 
       - name: Build portable folder
         shell: pwsh
         run: |
-          pyinstaller --noconfirm --clean --windowed --name "DJAR RVC Studio" --collect-all PySide6 --hidden-import requests app/main.py
+          pyinstaller --noconfirm --clean --windowed --name "DJAR RVC Studio" --collect-all PySide6 --collect-all soundfile --hidden-import requests --hidden-import numpy app/main.py
 
       - name: Add README
         shell: pwsh
@@ -39,9 +39,7 @@ jobs:
       - name: Validate portable build
         shell: pwsh
         run: |
-          if (-not (Test-Path 'dist\DJAR RVC Studio\DJAR RVC Studio.exe')) {
-            throw 'DJAR RVC Studio.exe was not created.'
-          }
+          if (-not (Test-Path 'dist\DJAR RVC Studio\DJAR RVC Studio.exe')) { throw 'DJAR RVC Studio.exe was not created.' }
           Get-ChildItem 'dist\DJAR RVC Studio' -Recurse | Select-Object FullName,Length
 
       - name: Upload portable folder
