@@ -31,18 +31,22 @@ jobs:
         run: |
           pyinstaller --noconfirm --clean --windowed --name "DJAR RVC Studio" app/main.py
 
-      - name: Add launcher and readme
+      - name: Add README
         shell: pwsh
         run: |
-          Copy-Item README.md dist\"DJAR RVC Studio"\README.md -ErrorAction SilentlyContinue
+          Copy-Item README.md 'dist\DJAR RVC Studio\README.md' -Force
 
-      - name: Zip portable build
+      - name: Validate portable build
         shell: pwsh
         run: |
-          Compress-Archive -Path dist\"DJAR RVC Studio" -DestinationPath DJAR-RVC-Studio-Portable.zip -Force
+          if (-not (Test-Path 'dist\DJAR RVC Studio\DJAR RVC Studio.exe')) {
+            throw 'DJAR RVC Studio.exe was not created.'
+          }
+          Get-ChildItem 'dist\DJAR RVC Studio' -Recurse | Select-Object FullName,Length
 
-      - name: Upload artifact
+      - name: Upload portable folder
         uses: actions/upload-artifact@v4
         with:
           name: DJAR-RVC-Studio-Portable
-          path: DJAR-RVC-Studio-Portable.zip
+          path: 'dist/DJAR RVC Studio'
+          if-no-files-found: error
