@@ -55,12 +55,7 @@ def _extract_choices(obj):
 
 
 def refresh_voices(self):
-    """Discover actual RVC voice choices from Gradio config, with API fallback.
-
-    The documented /run/infer_refresh endpoint returns the currently selected
-    voice, not the complete dropdown choices. The old code incorrectly expected
-    that response to be a list, so it always fell back to Speaker ID 0.
-    """
+    """Discover actual RVC voice choices from Gradio config, with API fallback."""
     base = self.api.text().strip().rstrip("/")
     if not base:
         return
@@ -76,7 +71,6 @@ def refresh_voices(self):
     except Exception:
         choices = []
 
-    # Deduplicate while preserving order and prefer meaningful model names.
     unique = []
     seen = set()
     for item in choices:
@@ -97,11 +91,14 @@ def refresh_voices(self):
 
     self.voice.clear()
     if unique:
-        for i, name in enumerate(unique):
-            self.voice.addItem(name, str(i))
+        for name in unique:
+            # IMPORTANT: itemData must be the actual .pth model name/path.
+            # Using an integer index here made Convert reject a valid model.
+            self.voice.addItem(name, name)
+        self.voice.setCurrentIndex(0)
         self.status.setText(f"Voice models loaded · {len(unique)} model(s)")
     else:
-        self.voice.addItem("No voice models detected", "0")
+        self.voice.addItem("No voice models detected", "")
         self.status.setText("No voice models found · check RVC weights/models folder")
     self.refresh_btn.setEnabled(True)
 
