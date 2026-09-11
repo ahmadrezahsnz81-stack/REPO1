@@ -20,8 +20,12 @@ Portable Windows desktop controller for the local RVC API.
 2. آخرین اجرای موفق با وضعیت **Success** را باز کنید.
 3. پایین صفحه، بخش **Artifacts** را پیدا کنید.
 4. روی **DJAR-RVC-Studio-Portable** کلیک کنید.
-5. فایل ZIP را دانلود و در ویندوز Extract کنید.
-6. فایل **`DJAR RVC Studio.exe`** را اجرا کنید.
+5. فایل ZIP دانلودشده را در یک پوشه معمولی مثل `Downloads` یا Desktop ذخیره کنید.
+6. ZIP را با Windows Explorer یا WinRAR روی هارد استخراج کنید.
+7. بعد از Extract، وارد پوشه **DJAR RVC Studio** شوید.
+8. فایل **`DJAR RVC Studio.exe`** را اجرا کنید.
+
+> **توجه:** نسخه جدید Artifact مستقیماً پوشه Portable را ارائه می‌کند و دیگر نباید یک ZIP داخلی را از داخل ZIP دیگری باز یا استخراج کنید.
 
 ### 🖥️ پیش‌نیازها
 
@@ -83,7 +87,17 @@ Output Audio
 
 در نسخه فعلی، **DJAR RVC Studio فقط رابط ویندوز و Bridge سمت RVC است**. اتصال واقعی ربات DJAR روی cPanel به این برنامه در مرحله بعدی قابل اضافه شدن است.
 
-### ❗ اگر برنامه به RVC وصل نشد
+### ❗ اگر برنامه یا استخراج فایل مشکل داشت
+
+**خطای WinRAR مثل `The system cannot find the path specified`:**
+
+1. فایل ZIP را مستقیماً از داخل مرورگر اجرا نکنید.
+2. ابتدا آن را کامل در `Downloads` ذخیره کنید.
+3. روی فایل ZIP راست‌کلیک کنید و **Extract All** یا **Extract to...** را بزنید.
+4. اگر WinRAR فایل را از یک مسیر موقت باز کرده، WinRAR را ببندید و ZIP را دوباره از محل ذخیره‌شده روی هارد باز کنید.
+5. اگر باز هم خطا داشت، ZIP را دوباره دانلود کنید و مطمئن شوید دانلود کامل شده است.
+
+**اگر برنامه به RVC وصل نشد:**
 
 1. مطمئن شوید RVC WebUI در حال اجراست.
 2. مطمئن شوید API روی پورت `7897` فعال است.
@@ -101,9 +115,11 @@ Output Audio
 
 **[Download the latest Portable build from GitHub Actions](https://github.com/ahmadrezahsnz81-stack/REPO1/actions/workflows/build-windows.yml)**
 
-Open the latest successful workflow run, find **Artifacts**, download **DJAR-RVC-Studio-Portable**, extract the ZIP on Windows, and run:
+Open the latest successful workflow run, find **Artifacts**, download **DJAR-RVC-Studio-Portable**, save it to a normal local folder, extract it, open the **DJAR RVC Studio** folder, and run:
 
 `DJAR RVC Studio.exe`
+
+The latest workflow uploads the portable folder directly, avoiding a ZIP-inside-a-ZIP package.
 
 ### Requirements
 
